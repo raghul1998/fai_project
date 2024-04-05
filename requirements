@@ -3,5 +3,8 @@ torchvision
 gym
 gym-super-mario-bros
 nes-py
-opencv-python
 numpy
+opencv-python
+torchrl
+tensordict
+cv2
