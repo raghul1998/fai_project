@@ -7,4 +7,4 @@ numpy
 opencv-python
 torchrl
 tensordict
-cv2
+scikit-image
