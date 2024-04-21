@@ -3,44 +3,60 @@ import time
 
 import matplotlib
 
-matplotlib.use('TkAgg')
+matplotlib.use('TkAgg')  # Set matplotlib backend to TkAgg for GUI support
 import matplotlib.pyplot as plt
 import numpy as np
 
 
 class MetricLogger:
     def __init__(self, save_dir):
+        """
+        Initializes the MetricLogger class to keep track of training metrics and save performance graphs.
+
+        Parameters:
+        - save_dir (Path): Directory path where logs and plots will be saved.
+        """
         self.save_log = save_dir / "log"
+        # Open and initialize the log file with headers.
         with open(self.save_log, "w") as f:
             f.write(
                 f"{'Episode':>8}{'Step':>8}{'Epsilon':>10}{'MeanReward':>15}"
                 f"{'MeanLength':>15}{'MeanLoss':>15}{'MeanQValue':>15}"
                 f"{'TimeDelta':>15}{'Time':>20}\n"
             )
+
+        # File paths for plots.
         self.ep_rewards_plot = save_dir / "reward_plot.jpg"
         self.ep_lengths_plot = save_dir / "length_plot.jpg"
         self.ep_avg_losses_plot = save_dir / "loss_plot.jpg"
         self.ep_avg_qs_plot = save_dir / "q_plot.jpg"
 
-        # History metrics
-        self.ep_rewards = []
-        self.ep_lengths = []
-        self.ep_avg_losses = []
-        self.ep_avg_qs = []
+        # Initialize lists to keep track of metrics.
+        self.ep_rewards = []  # Episode rewards
+        self.ep_lengths = []  # Episode lengths
+        self.ep_avg_losses = []  # Average losses per episode
+        self.ep_avg_qs = []  # Average Q values per episode
 
-        # Moving averages, added for every call to record()
+        # Lists for moving averages of the metrics.
         self.moving_avg_ep_rewards = []
         self.moving_avg_ep_lengths = []
         self.moving_avg_ep_avg_losses = []
         self.moving_avg_ep_avg_qs = []
 
-        # Current episode metric
-        self.init_episode()
+        self.init_episode()  # Initialize the current episode data.
 
-        # Timing
+        # Timing to measure intervals between records.
         self.record_time = time.time()
 
     def log_step(self, reward, loss, q):
+        """
+        Log the results of a single step taken by the agent.
+
+        Parameters:
+        - reward (float): Reward received after the step.
+        - loss (float): Loss value from the step.
+        - q (float): Q value from the step.
+        """
         self.curr_ep_reward += reward
         self.curr_ep_length += 1
         if loss:
@@ -49,7 +65,9 @@ class MetricLogger:
             self.curr_ep_loss_length += 1
 
     def log_episode(self):
-        """Mark end of episode"""
+        """
+        Finalize logging for the current episode and reset episode metrics.
+        """
         self.ep_rewards.append(self.curr_ep_reward)
         self.ep_lengths.append(self.curr_ep_length)
         if self.curr_ep_loss_length == 0:
@@ -61,9 +79,12 @@ class MetricLogger:
         self.ep_avg_losses.append(ep_avg_loss)
         self.ep_avg_qs.append(ep_avg_q)
 
-        self.init_episode()
+        self.init_episode()  # Reset current episode data.
 
     def init_episode(self):
+        """
+        Initialize or reset current episode data.
+        """
         self.curr_ep_reward = 0.0
         self.curr_ep_length = 0
         self.curr_ep_loss = 0.0
@@ -71,31 +92,40 @@ class MetricLogger:
         self.curr_ep_loss_length = 0
 
     def record(self, episode, epsilon, step):
+        """
+        Record and print training progress at the end of an episode.
+
+        Parameters:
+        - episode (int): Current episode number.
+        - epsilon (float): Current epsilon value for exploration.
+        - step (int): Current step number in the training process.
+        """
+        # Calculate moving averages of the last 100 episodes
         mean_ep_reward = np.round(np.mean(self.ep_rewards[-100:]), 3)
         mean_ep_length = np.round(np.mean(self.ep_lengths[-100:]), 3)
         mean_ep_loss = np.round(np.mean(self.ep_avg_losses[-100:]), 3)
         mean_ep_q = np.round(np.mean(self.ep_avg_qs[-100:]), 3)
+        # Append moving averages to lists.
         self.moving_avg_ep_rewards.append(mean_ep_reward)
         self.moving_avg_ep_lengths.append(mean_ep_length)
         self.moving_avg_ep_avg_losses.append(mean_ep_loss)
         self.moving_avg_ep_avg_qs.append(mean_ep_q)
 
+        # Calculate the time since the last record.
         last_record_time = self.record_time
         self.record_time = time.time()
         time_since_last_record = np.round(self.record_time - last_record_time, 3)
 
+        # Log the record in the console.
         print(
-            f"Episode {episode} - "
-            f"Step {step} - "
-            f"Epsilon {epsilon} - "
-            f"Mean Reward {mean_ep_reward} - "
-            f"Mean Length {mean_ep_length} - "
-            f"Mean Loss {mean_ep_loss} - "
-            f"Mean Q Value {mean_ep_q} - "
+            f"Episode {episode} - Step {step} - Epsilon {epsilon} - "
+            f"Mean Reward {mean_ep_reward} - Mean Length {mean_ep_length} - "
+            f"Mean Loss {mean_ep_loss} - Mean Q Value {mean_ep_q} - "
             f"Time Delta {time_since_last_record} - "
             f"Time {datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}"
         )
 
+        # Append the log entry to the file.
         with open(self.save_log, "a") as f:
             f.write(
                 f"{episode:8d}{step:8d}{epsilon:10.3f}"
@@ -104,7 +134,8 @@ class MetricLogger:
                 f"{datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S'):>20}\n"
             )
 
+        # Update and save plots for each metric.
         for metric in ["ep_rewards", "ep_lengths", "ep_avg_losses", "ep_avg_qs"]:
-            plt.plot(getattr(self, f"moving_avg_{metric}"))
-            plt.savefig(getattr(self, f"{metric}_plot"))
-            plt.clf()
+            plt.plot(getattr(self, f"moving_avg_{metric}"))  # Plot moving averages.
+            plt.savefig(getattr(self, f"{metric}_plot"))  # Save the plot to file.
+            plt.clf()  # Clear the plot to prepare for the next update.
