@@ -42,10 +42,10 @@ def main():
     save_dir = Path('checkpoints') / datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
     save_dir.mkdir(parents=True)
 
-    # checkpoint = None  # Optionally set a checkpoint path to load a pre-trained model
+    checkpoint = None  # Optionally set a checkpoint path to load a pre-trained model
 
     # Load pretrained model if required by uncommenting below
-    checkpoint = Path('checkpoints/2024-04-06T18-01-02/mario_net_13.chkpt')
+    # checkpoint = Path('checkpoints/2024-04-06T18-01-02/mario_net_13.chkpt')
 
     # Initialize the Mario agent with configurations
     mario = Mario(state_dim=(4, 84, 84), action_dim=env.action_space.n, save_dir=save_dir,
