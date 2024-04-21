@@ -31,14 +31,15 @@ env.reset()
 save_dir = Path('checkpoints') / datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
 save_dir.mkdir(parents=True)
 
-checkpoint = Path('checkpoints/2024-04-01T02-02-24/mario_net_3.chkpt')
+# checkpoint = None
+checkpoint = Path('checkpoints/2024-04-06T18-01-02/mario_net_13.chkpt')
 mario = Mario(state_dim=(4, 84, 84), action_dim=env.action_space.n, save_dir=save_dir,
               checkpoint=checkpoint)
 mario.exploration_rate = mario.exploration_rate_min
 
 logger = MetricLogger(save_dir)
 
-episodes = 5
+episodes = 100
 
 for episode in range(episodes):
     print("Episode: ", episode)
@@ -47,6 +48,7 @@ for episode in range(episodes):
         env.render()
         action = mario.act(state)
         next_state, reward, done, truncated, info = env.step(action)
+        print(f"Action: {action}, Reward: {reward}")
         mario.cache(state, next_state, action, reward, done)
         logger.log_step(reward, None, None)
         state = next_state

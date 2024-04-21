@@ -15,7 +15,7 @@ class Mario:
         self.action_dim = action_dim
         # self.memory = deque(maxlen=100000)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.memory = TensorDictReplayBuffer(storage=LazyMemmapStorage(50000))
+        self.memory = TensorDictReplayBuffer(storage=LazyMemmapStorage(10000))
         self.batch_size = 32
 
         self.exploration_rate = 1

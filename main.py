@@ -44,7 +44,7 @@ def main():
     save_dir = Path('checkpoints') / datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')
     save_dir.mkdir(parents=True)
     # checkpoint = None
-    checkpoint = Path('checkpoints/2024-03-29T03-41-03/mario_net_15.chkpt')
+    checkpoint = Path('checkpoints/2024-04-06T18-01-02/mario_net_13.chkpt')
 
     mario = Mario(state_dim=(4, 84, 84), action_dim=env.action_space.n, save_dir=save_dir,
                   checkpoint=checkpoint)
